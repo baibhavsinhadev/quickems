@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import LoginLeftSide from "./LoginLeftSide";
+import { useAuthProvider } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const LoginForm = ({ role, title, subTitle }) => {
 
@@ -11,19 +13,23 @@ const LoginForm = ({ role, title, subTitle }) => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const { login } = useAuthProvider();
+    const navigate = useNavigate();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        setLoading(true);
         setError("");
+        setLoading(true);
 
-        setTimeout(() => {
+        try {
+            await login(email, password, role);
+            navigate("/dashboard");
+            toast.success("Logged In Successfully");
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
             setLoading(false);
-
-            if (!email || !password) {
-                setError("Please fill all fields");
-            }
-        }, 1000);
+        };
     };
 
     return (

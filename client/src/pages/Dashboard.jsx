@@ -3,6 +3,8 @@ import { dummyAdminDashboardData, dummyEmployeeDashboardData } from "../assets/a
 import Loading from "../components/Loading";
 import EmployeeDashboard from "../components/EmployeeDashboard";
 import AdminDashboard from "../components/AdminDashboard";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
 
@@ -10,10 +12,18 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setData(dummyAdminDashboardData);
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+        const fetchData = async () => {
+            try {
+                const res = await api.get('/dashboard');
+                setData(res.data);
+            } catch (error) {
+                toast.error(error?.response?.data?.message || "Failed to fetch dashboard data");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
     if (loading) return <Loading />;

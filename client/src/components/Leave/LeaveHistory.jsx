@@ -1,6 +1,8 @@
 import { format } from "date-fns";
 import { Check, XIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import api from "../../api/axios";
 
 const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
 
@@ -10,7 +12,11 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
         setProcessing({ id, type: status });
 
         try {
-            await onUpdate(id, status);
+            await api.patch(`/leaves/${id}`, { status });
+            onUpdate();
+            toast.success(status === "REJECTED" ? "Leave Rejected" : "Leave Approved");
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to update leave status");
         } finally {
             setProcessing({ id: null, type: null });
         }
@@ -74,7 +80,7 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
 
                                     {isAdmin && (
                                         <td className="text-slate-900">
-                                            {leave.status === "PENDING" && (
+                                            {leave.status === "PENDING" ? (
                                                 <div className="flex justify-center gap-1">
                                                     <button onClick={() => handleStatusUpdate(leave._id || leave.id, "APPROVED")} disabled={processing.id === (leave._id || leave.id)} className="p-1.5 rounded-md bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
                                                         {processing.id === (leave._id || leave.id) && processing.type === "APPROVED" ? (
@@ -91,6 +97,22 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
                                                             <XIcon className="w-4 h-4" />
                                                         )}
                                                     </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex justify-center">
+                                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${leave.status === "APPROVED" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
+                                                        {leave.status === "APPROVED" ? (
+                                                            <>
+                                                                <Check className="w-3.5 h-3.5" />
+                                                                Approved
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <XIcon className="w-3.5 h-3.5" />
+                                                                Rejected
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
                                         </td>

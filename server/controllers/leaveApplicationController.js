@@ -74,7 +74,7 @@ export const getLeaves = async (req, res) => {
                 };
             });
 
-            return res.json({ data });
+            return res.json({ result: leaves });
         } else {
             const employee = await Employee.findOne({ userId: session.userId }).lean();
             if (!employee) return res.status(404).json({ success: false, message: "Employee Not Found" });
@@ -83,7 +83,7 @@ export const getLeaves = async (req, res) => {
 
             return res.json({
                 success: true,
-                data: leaves,
+                result: leaves,
                 employee: {
                     ...employee,
                     id: employee._id.toString()

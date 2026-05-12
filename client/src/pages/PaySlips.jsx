@@ -3,22 +3,31 @@ import { dummyEmployeeData, dummyPayslipData } from "../assets/assets";
 import Loading from "../components/Loading";
 import PayslipList from "../components/Payslip/PayslipList";
 import GeneratePayslipsForm from "../components/Payslip/GeneratePayslipsForm";
+import { useAuthProvider } from "../context/AuthContext";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const PaySlips = () => {
+
+    const { user } = useAuthProvider();
 
     const [paySlips, setPaySlips] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const isAdmin = true;
+    const isAdmin = user?.role === "ADMIN";
 
-    const fetchPaySlips = () => {
+    const fetchPaySlips = async () => {
         setLoading(true);
-        setPaySlips(dummyPayslipData);
 
-        setTimeout(() => {
+        try {
+            const res = await api.get("/payslips");
+            setPaySlips(res.data.data || [])
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to update payslips");
+        } finally {
             setLoading(false);
-        }, 500);
+        };
     };
 
     useEffect(() => {
@@ -26,9 +35,20 @@ const PaySlips = () => {
     }, []);
 
     useEffect(() => {
-        if (isAdmin) {
-            setEmployees(dummyEmployeeData)
+        const fetchEmployees = async () => {
+            try {
+                const res = await api.get('/employees');
+                setEmployees(
+                    res.data.result.filter((employee) => !employee.isDeleted)
+                );
+            } catch (error) {
+                toast.error(error?.response?.data?.message || error.message, "Failed to fetch employees");
+            }
         };
+
+        if (isAdmin) {
+            fetchEmployees();
+        }
     }, [isAdmin]);
 
     if (loading) return <Loading />

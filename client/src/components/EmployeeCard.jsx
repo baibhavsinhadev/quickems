@@ -1,9 +1,19 @@
 import { PencilIcon, Trash2Icon } from "lucide-react";
+import { toast } from "react-toastify";
+import api from "../api/axios";
 
 const EmployeeCard = ({ employee, onDelete, onEdit }) => {
 
     const handleDelete = async () => {
         if (!confirm("Are your sure you want to delete this employee")) return;
+
+        try {
+            await api.delete(`/employees/${employee.id}`);
+            onDelete();
+            toast.success("Employee Deleted")
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
+        }
     }
 
     return (
@@ -31,7 +41,7 @@ const EmployeeCard = ({ employee, onDelete, onEdit }) => {
                     <button onClick={() => onEdit(employee)} className="p-2.5 bg-white/90 backdrop-blur-sm text-slate-700 hover:text-slate-600 rounded-xl shadow-lg transition-all hover:scale-105 cursor-pointer">
                         <PencilIcon className="w-4 h-4" />
                     </button>
-                    
+
                     <button onClick={() => handleDelete(employee)} className="p-2.5 bg-white/90 backdrop-blur-sm text-slate-700 hover:text-rose-600 rounded-xl shadow-lg transition-all hover:scale-105 cursor-pointer disabled:opacity-50">
                         <Trash2Icon className="w-4 h-4" />
                     </button>

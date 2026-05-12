@@ -1,5 +1,7 @@
 import { Loader2Icon, SaveIcon, UserIcon } from "lucide-react";
 import { useState } from "react";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const ProfileForm = ({ initalData, onSuccess }) => {
 
@@ -9,6 +11,22 @@ const ProfileForm = ({ initalData, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
+        setMessage("");
+        const formDate = new FormData(e.currentTarget);
+
+        try {
+            await api.post("/profile", formDate);
+            setMessage("Profile updated successfully");
+            onSuccess?.();
+            toast.success("Profile updated successfully");
+        } catch (error) {
+            setError(error?.response?.data?.message || "Failed to update profile");
+            toast.error(error?.response?.data?.message || "Failed to update profile");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -50,7 +68,7 @@ const ProfileForm = ({ initalData, onSuccess }) => {
                     <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-slate-700 mb-2">Position</label>
 
-                        <input disabled value={`${initalData.position}`} className="bg-slate-50 text-slate-400 cursor-not-allowed" />
+                        <input disabled value={`${initalData.position || ""}`} className="bg-slate-50 text-slate-400 cursor-not-allowed" />
                     </div>
 
                     <div className="sm:col-span-2">

@@ -1,23 +1,35 @@
 import { useCallback, useEffect, useState } from "react";
-import { dummyAttendanceData } from "../assets/assets";
+import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import CheckInButton from "../components/Attendance/CheckInButton";
 import AttendanceStats from "../components/Attendance/AttendanceStats";
 import AttendanceHistory from "../components/Attendance/AttendanceHistory";
+import api from "../api/axios";
 
 const Attendance = () => {
 
     const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [isDeleted, setIsDeleted] = useState(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
-        setHistory(dummyAttendanceData);
 
-        setTimeout(() => {
+        try {
+            const res = await api.get("/attendance");
+            const json = res.data;
+
+            if (!json?.success) {
+                throw new Error("Invalid response");
+            };
+
+            setHistory(json.result || []);
+            setIsDeleted(!!json.employee?.isDeleted);
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to fetch attendance");
+        } finally {
             setLoading(false)
-        }, 500);
+        };
     }, []);
 
     useEffect(() => {

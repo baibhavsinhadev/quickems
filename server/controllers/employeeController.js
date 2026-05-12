@@ -1,6 +1,6 @@
 import Employee from "../models/Employee.js";
 import User from "../models/User.js";
-import bcrypt from 'bcrypt'
+import bcrypt from "bcrypt";
 
 // Get Employees
 // GET /api/employees
@@ -8,25 +8,30 @@ export const getEmployees = async (req, res) => {
     try {
         const { department } = req.query;
 
-        const where = {};
-        if (department) where.department = department;
+        const filter = {};
+        if (department) filter.department = department;
 
-        const employees = (await Employee.find(where)).toSorted({ createdAt: -1 }).populate("userId", "email role").lean();
+        const employees = await Employee.find(filter).sort({ createdAt: -1 }).populate("userId", "email role").lean();
 
-        const result = employees.map((employee) => ({
-            ...employee,
-            id: employee._id.toString(),
-            user: employee.userId ? {
-                email: employee.userId.email,
-                role: employee.userId.role,
-            } : null
+        const result = employees.map((emp) => ({
+            ...emp,
+            id: emp._id.toString(),
+            user: emp.userId
+                ? {
+                    email: emp.userId.email,
+                    role: emp.userId.role,
+                }
+                : null,
         }));
 
         return res.json({ success: true, result });
     } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ success: false, message: "Failed to fetch employees" });
-    };
+        console.error("GET EMPLOYEES ERROR:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch employees",
+        });
+    }
 };
 
 // Create Employee

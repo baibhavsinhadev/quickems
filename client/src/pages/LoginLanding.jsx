@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import LoginLeftSide from "../components/LoginLeftSide";
 import { ArrowRightIcon, ShieldIcon, UserIcon } from 'lucide-react'
+import { useAuthProvider } from "../context/AuthContext";
+import Loading from "../components/Loading";
 
 const LoginLanding = () => {
 
@@ -17,7 +19,11 @@ const LoginLanding = () => {
             description: "View your profile, track attendance, request time off, and access payslips.",
             icon: UserIcon
         }
-    ]
+    ];
+
+    const { user, loading } = useAuthProvider();
+    if (loading) return <Loading />
+    if (user) return <Navigate to="/" />
 
     return (
         <div className="min-h-screen flex flex-col md:flex-row">

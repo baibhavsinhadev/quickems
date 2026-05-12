@@ -4,11 +4,19 @@ import Employee from "../models/Employee.js";
 import LeaveApplication from "../models/LeaveApplication.js";
 import Payslip from "../models/Payslip.js";
 
-// Get dashboard for employee & admin
 // GET /api/dashboard
 export const getDashboard = async (req, res) => {
     try {
         const session = req.session;
+
+        if (!session?.userId || !session?.role) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized"
+            });
+        }
+
+        // ================= ADMIN =================
         if (session.role === "ADMIN") {
             const [totalEmployees, todayAttendance, pendingLeaves] = await Promise.all([
                 Employee.countDocuments({ isDeleted: { $ne: true } }),
@@ -31,42 +39,59 @@ export const getDashboard = async (req, res) => {
                 todayAttendance,
                 pendingLeaves
             });
-        } else {
-            const employee = await Employee.findOne({ userId: session.userId }).lean();
-            if (!employee) return res.status(404).json({ success: false, message: "Employee Not Found" });
+        }
 
-            const today = new Date();
-            const [currentMonthAttendance, pendingLeaves, latestPayslip] = await Promise.all([
-                Attendance.countDocuments({
-                    employeeId: employee._id,
-                    date: {
-                        $gte: new Date(today.getFullYear(), today.getMonth, 1),
-                        $lt: new Date(today.getFullYear(), today.getMonth + 1, 1),
-                    }
-                }),
+        // ================= EMPLOYEE =================
+        const employee = await Employee.findOne({ userId: session.userId }).lean();
 
-                LeaveApplication.countDocuments({
-                    employeeId: employee._id,
-                    status: "PENDING"
-                }),
-
-                Payslip.countDocuments({ employeeId: employee._id }).sort({ createdAt: -1 }).lean()
-            ]);
-
-            return res.json({
-                success: true,
-                role: "EMPLOYEE",
-                employee: {
-                    ...employee,
-                    id: employee._id.toString()
-                },
-                currentMonthAttendance,
-                pendingLeaves,
-                latestPayslip: latestPayslip ? { ...latestPayslip, id: latestPayslip._id.toString() } : null
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: "Employee Not Found"
             });
-        };
+        }
+
+        const today = new Date();
+
+        const [currentMonthAttendance, pendingLeaves, latestPayslip] = await Promise.all([
+            Attendance.countDocuments({
+                employeeId: employee._id,
+                date: {
+                    $gte: new Date(today.getFullYear(), today.getMonth(), 1),
+                    $lt: new Date(today.getFullYear(), today.getMonth() + 1, 1),
+                }
+            }),
+
+            LeaveApplication.countDocuments({
+                employeeId: employee._id,
+                status: "PENDING"
+            }),
+
+            Payslip.findOne({ employeeId: employee._id })
+                .sort({ createdAt: -1 })
+                .lean()
+        ]);
+
+        return res.json({
+            success: true,
+            role: "EMPLOYEE",
+            employee: {
+                ...employee,
+                id: employee._id.toString()
+            },
+            currentMonthAttendance,
+            pendingLeaves,
+            latestPayslip: latestPayslip
+                ? { ...latestPayslip, id: latestPayslip._id.toString() }
+                : null
+        });
+
     } catch (error) {
-        console.error("Dashboard error: ", error);
-        return res.status(500).json({ success: false, message: "Failed to fetch dashboard data" })
-    };
+        console.error("Dashboard error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch dashboard data"
+        });
+    }
 };

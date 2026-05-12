@@ -5,6 +5,11 @@ const AttendanceStats = ({ history }) => {
     const totalPresent = history.filter((h) => h.status === "PRESENT" | h.status === "LATE").length;
     const totalLate = history.filter((h) => h.status === "LATE").length;
 
+    const workingEntries = history.filter((h) => h.workingHours);
+    const avgHours = workingEntries.length
+        ? (workingEntries.reduce((sum, h) => sum + h.workingHours, 0) / workingEntries.length).toFixed(1)
+        : 0;
+
     const stats = [
         {
             label: "Days Present",
@@ -18,7 +23,7 @@ const AttendanceStats = ({ history }) => {
         },
         {
             label: "Average Work Hours",
-            value: "8.5 hrs",
+            value: avgHours,
             icon: ClockIcon
         },
     ];

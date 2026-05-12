@@ -1,27 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
 import { dummyLeaveData } from "../assets/assets";
-import Loading from "../components/Loading";
 import { PalmtreeIcon, PlusIcon, ThermometerIcon, UmbrellaIcon } from "lucide-react";
+import { useAuthProvider } from "../context/AuthContext";
+import Loading from "../components/Loading";
 import LeaveHistory from "../components/Leave/LeaveHistory";
 import ApplyLeaveModal from "../components/Leave/ApplyLeaveModal";
+import api from "../api/axios";
 
 const Leave = () => {
+
+    const { user } = useAuthProvider();
 
     const [leaves, setLeaves] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
+    const isAdmin = user?.role === "ADMIN";
 
-    const isAdmin = false;
-
-    const fetchLeaves = () => {
+    const fetchLeaves = useCallback(async () => {
         setLoading(true);
-        setLeaves(dummyLeaveData);
 
-        setTimeout(() => {
+        try {
+            const res = await api.get('/leaves');
+            setLeaves(res.data.result || []);
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to fetch leaves");
+        } finally {
             setLoading(false);
-        }, 500);
-    };
+        };
+    }, []);
 
     useEffect(() => {
         fetchLeaves();

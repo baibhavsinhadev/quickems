@@ -1,5 +1,6 @@
 import { Loader2Icon, Plus, XIcon } from "lucide-react";
 import { useState } from "react";
+import api from "../../api/axios";
 
 const GeneratePayslipsForm = ({ employees, onSuccess }) => {
     const months = [
@@ -31,6 +32,21 @@ const GeneratePayslipsForm = ({ employees, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            await api.post('/payslips', data);
+            setIsOpen(false);
+            onSuccess();
+            toast.success("Payslip Generated");
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to generate payslip");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
@@ -109,6 +125,14 @@ const GeneratePayslipsForm = ({ employees, onSuccess }) => {
                                 ))}
                             </select>
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Basic Salary
+                        </label>
+
+                        <input type="number" name="basicSalary" defaultValue={0} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

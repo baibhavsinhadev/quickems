@@ -4,20 +4,31 @@ import Loading from "../components/Loading";
 import { Lock } from "lucide-react";
 import ProfileForm from "../components/ProfileForm";
 import ChangePasswordModal from "../components/ChangePasswordModal";
+import { useAuthProvider } from "../context/AuthContext";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const Settings = () => {
+
+    const { user } = useAuthProvider();
 
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false)
 
     const fetchProfile = async () => {
-        setLoading(true)
-        setProfile(dummyProfileData)
+        setLoading(true);
 
-        setTimeout(() => {
-            setLoading(false)
-        }, 500);
+        try {
+            const res = await api.get("/profile");
+            const profile = res.data;
+
+            if (profile) setProfile(profile);
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to fetch profile");
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {

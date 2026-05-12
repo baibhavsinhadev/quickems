@@ -5,7 +5,7 @@ import { protect, protectAdmin } from '../middlewares/auth.js';
 const payslipRouter = Router();
 
 payslipRouter.post("/", protect, protectAdmin, createPayslip);
-payslipRouter.get("/", protect, protectAdmin, getPayslip);
-payslipRouter.get("/:id", protect, protectAdmin, getPayslipByID);
+payslipRouter.get("/", protect, getPayslip);
+payslipRouter.get("/:id", protect, getPayslipByID);
 
 export default payslipRouter;

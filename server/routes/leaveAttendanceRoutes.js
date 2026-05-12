@@ -6,6 +6,6 @@ const leaveApplicationRouter = Router();
 
 leaveApplicationRouter.post("/", protect, createLeave);
 leaveApplicationRouter.get("/", protect, getLeaves);
-leaveApplicationRouter.get("/:id", protect, protectAdmin, updateLeaveStatus);
+leaveApplicationRouter.patch("/:id", protect, protectAdmin, updateLeaveStatus);
 
 export default leaveApplicationRouter;

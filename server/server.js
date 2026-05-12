@@ -8,7 +8,7 @@ import morgan from "morgan";
 
 import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.js";
-import { apiLimiter, authLimiter } from "./middlewares/rateLimiter.js";
+import { apiLimiter } from "./middlewares/rateLimiter.js";
 
 import connectDB from "./config/mongoDB.js";
 
@@ -47,7 +47,6 @@ app.get("/", (req, res) => {
 });
 
 // Rate Limiting
-app.use("/api/auth", authLimiter);
 app.use("/api", apiLimiter);
 
 // Routes

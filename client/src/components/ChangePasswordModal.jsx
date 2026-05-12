@@ -1,5 +1,7 @@
 import { Loader2Icon, LockIcon, XIcon } from "lucide-react";
 import { useState } from "react";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const ChangePasswordModal = ({ open, onClose }) => {
 
@@ -8,6 +10,23 @@ const ChangePasswordModal = ({ open, onClose }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setMessage({ type: "", text: "" });
+        const formData = new FormData(e.currentTarget);
+        const currentPassword = formData.get("currentPassword");
+        const newPassword = formData.get("newPassword");
+
+        try {
+            const { data } = await api.post("/auth/change-password", { currentPassword, newPassword });
+
+            if (!data.success) throw new Error(data.message || "Failed to update password");
+            e.target.reset();
+            toast.success("Password resetted successfully");
+        } catch (error) {
+            setMessage({ type: "error", text: error.message })
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!open) return null;
