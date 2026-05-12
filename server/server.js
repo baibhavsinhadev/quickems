@@ -5,7 +5,6 @@ import cors from "cors";
 import multer from "multer";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
 import morgan from "morgan";
 
 import { serve } from "inngest/express";
@@ -44,7 +43,6 @@ app.use(express.json({ limit: "10kb" }));
 app.use(multer().none());
 
 app.use(mongoSanitize());
-app.use(xss());
 
 // Health Check
 app.get("/", (req, res) => {
