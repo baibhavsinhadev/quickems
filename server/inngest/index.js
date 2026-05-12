@@ -159,7 +159,7 @@ const attendanceReminderCron = inngest.createFunction(
     {
         id: "attendance-reminder-cron",
         triggers: {
-            cron: "0 0 6 * * *" // 06:00 UTC = 11:30 AM IST
+            cron: "0 6 * * *" // 06:00 UTC = 11:30 AM IST
         }
     },
     async ({ step }) => {
