@@ -74,7 +74,7 @@ export const getLeaves = async (req, res) => {
                 };
             });
 
-            return res.json({ result: leaves });
+            return res.json({ result: data });
         } else {
             const employee = await Employee.findOne({ userId: session.userId }).lean();
             if (!employee) return res.status(404).json({ success: false, message: "Employee Not Found" });
