@@ -90,8 +90,10 @@ server/
 client/
 ├── public/
 ├── src/
+│   ├── api/
 │   ├── assets/
 │   ├── components/
+│   ├── context/
 │   ├── pages/
 │   ├── App.jsx
 │   ├── index.css
